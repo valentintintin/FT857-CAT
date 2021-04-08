@@ -1,5 +1,5 @@
 /*
-  FT857D.h		Arduino library for controlling a Yaesu FT857D
+  FT857D.h	Arduino library for controlling a Yaesu FT857D
 			radio via CAT commands.
 
  Version:  0.1
@@ -13,14 +13,19 @@ Released:  2020.04.19
   Author:  Philippe Lonc, F6CZV
 From previous version 1.03
 - Comments on Read Rx status and Tx status were rewritten (only one byte status),
-- get SMeter() function is now a String function (was a char *)
+- get SMeter() function is now a String function (was a char*)
+
+ Version:  1.1.0
+ Created:  2020.04.08
+Released:  2020.04.08
+  Author:  Valentin Saugnier, F4HVV
 
 LIMITATION OF LIABILITY :
  This source code is provided "as-is". It may contain bugs. 
 Any damages resulting from its use is done under the sole responsibility of the user/developper
  and beyond my responsibility.
 
-CAT commands for FT-857D radio taken from the FT-857D Manual (page 66):
+CAT commands for FT-857 radio taken from the FT-857 Manual (page 66):
 	
 http://www.yaesu.co.uk/files/FT-857D_Operating%20Manual.pdf
 
@@ -331,11 +336,16 @@ All CAT commands to the radio should be sent as 5-byte blocks. The commands are 
 ----------------------------------------------------------------
 */
 
-#ifndef CAT_h
-#define CAT_h
+#ifndef FT857_CAT_DEFINES_h
+#define FT857_CAT_DEFINES_h
 
 #include <Arduino.h>
-#include <SoftwareSerial.h>
+
+#if defined(ESP8266) || defined(ESP32)
+    #include <HardwareSerial.h>
+#else
+    #include <SoftwareSerial.h>
+#endif
 
 // New constants added by F6CZV
 
@@ -343,35 +353,35 @@ All CAT commands to the radio should be sent as 5-byte blocks. The commands are 
 #define MSB_ADD_VFO_status		0x00
 #define LSB_ADD_CW_MTR_CONF		0x6B
 #define MSB_ADD_CW_MTR_CONF		0x00
-#define LSB_ADD_AGC_DSP_CONF		0xA8
-#define MSB_ADD_AGC_DSP_CONF		0x00
-#define LSB_ADD_SPLIT_STATUS		0x8D
-#define MSB_ADD_SPLIT_STATUS		0x00
+#define LSB_ADD_AGC_DSP_CONF	0xA8
+#define MSB_ADD_AGC_DSP_CONF	0x00
+#define LSB_ADD_SPLIT_STATUS	0x8D
+#define MSB_ADD_SPLIT_STATUS	0x00
 
 #define CAT_EEPROM_READ_CMD		0xBB
 
 // end of new constants
 
-#define CAT_LOCK_ON			0x00
+#define CAT_LOCK_ON			    0x00
 #define CAT_LOCK_OFF			0x80
-#define CAT_PTT_ON			0x08
-#define CAT_PTT_OFF			0x88
+#define CAT_PTT_ON  			0x08
+#define CAT_PTT_OFF	    		0x88
 #define CAT_FREQ_SET			0x01
 #define CAT_MODE_SET			0x07
 #define CAT_MODE_LSB			0x00
 #define CAT_MODE_USB			0x01
-#define CAT_MODE_CW			0x02
+#define CAT_MODE_CW		    	0x02
 #define CAT_MODE_CWR			0x03
-#define CAT_MODE_AM			0x04
-#define CAT_MODE_FM			0x08
+#define CAT_MODE_AM			    0x04
+#define CAT_MODE_FM			    0x08
 #define CAT_MODE_DIG			0x0A
 #define CAT_MODE_PKT			0x0C
 #define CAT_MODE_FMN			0x88
 #define CAT_MODE_WFM			0x06
-#define CAT_CLAR_ON			0x05
+#define CAT_CLAR_ON			    0x05
 #define CAT_CLAR_OFF			0x85
 #define CAT_CLAR_SET			0xF5
-#define CAT_VFO_AB			0x81
+#define CAT_VFO_AB			    0x81
 #define CAT_SPLIT_ON			0x02
 #define CAT_SPLIT_OFF			0x82
 #define CAT_RPTR_OFFSET_CMD		0x09
@@ -379,14 +389,14 @@ All CAT commands to the radio should be sent as 5-byte blocks. The commands are 
 #define CAT_RPTR_OFFSET_P		0x49 // +
 #define CAT_RPTR_OFFSET_S		0x89 // simlex
 #define CAT_RPTR_FREQ_SET		0xF9
-#define CAT_SQL_CMD			0x0A //{P1 ,0x00,0x00,0x00,0x0A}
-#define CAT_SQL_DCS			0x0A // all values below are P1
+#define CAT_SQL_CMD		    	0x0A //{P1 ,0x00,0x00,0x00,0x0A}
+#define CAT_SQL_DCS			    0x0A // all values below are P1
 #define CAT_SQL_DCS_DECD		0x0B // only useful in "split"
 #define CAT_SQL_DCS_ENCD		0x0C
 #define CAT_SQL_CTCSS			0x2A
 #define CAT_SQL_CTCSS_DECD		0x3A
 #define CAT_SQL_CTCSS_ENCD		0x4A
-#define CAT_SQL_OFF			0x8A
+#define CAT_SQL_OFF			    0x8A
 #define CAT_SQL_CTCSS_SET		0x0B
 #define CAT_SQL_DCS_SET			0x0C
 #define CAT_RX_DATA_CMD			0xE7
@@ -394,50 +404,38 @@ All CAT commands to the radio should be sent as 5-byte blocks. The commands are 
 #define CAT_RX_FREQ_CMD			0x03
 #define CAT_NULL_DATA			0x00
 
-class FT857D
-{
-public:
-    FT857D();
-    void setSerial(SoftwareSerial portInfo);
-    void begin(unsigned long baud = 38400);
+// New constants added by F4HVV
 
-    void lock(boolean toggle);
-    void PTT(boolean toggle);
-    void setFreq(long freq);
-    void setMode(char * mode);
-    void clar(boolean toggle);
-//	void clarFreq(long freq);
-    void switchVFO();
-    void split(boolean toggle);
-    void rptrOffset(char * ofst);
-    void rptrOffsetFreq(long freq);
-    void squelch(char * mode);
-    void squelchFreq(unsigned int, char * sqlType);
-    char * getMode(); // modified by F6CZV
-    char getVFO(); // new function F6CZV
-    unsigned long getFreqMode();
-    bool chkTx(); // was boolean F6CZV
-    String getSMeter(); // new function F6CZV
-    void getCW_MTR_Conf(byte &MTR,bool &KYR,bool &BK); // new function F6CZV
-    void getAGC_DSP_Conf(bool &AGC,bool &DBF,bool &DNR, bool &DNF); // new function F6CZV
-    bool getSPLIT_status(); // new function F6CZV
-    void flushRX();
+#define MODE_LSB	    	    CAT_MODE_LSB
+#define MODE_USB	    		CAT_MODE_USB
+#define MODE_CW		        	CAT_MODE_CW
+#define MODE_CWR	    		CAT_MODE_CWR
+#define MODE_AM		    	    CAT_MODE_AM
+#define MODE_FM			        CAT_MODE_FM
+#define MODE_DIG	    		CAT_MODE_DIG
+#define MODE_PKT		    	CAT_MODE_PKT
+#define MODE_FMN		    	CAT_MODE_FMN
+#define MODE_WFM		    	CAT_MODE_WFM
 
+#define REPEATER_OFFSET_MINUS	CAT_RPTR_OFFSET_N // -
+#define REPEATER_OFFSET_PLUS	CAT_RPTR_OFFSET_P // +
+#define REPEATER_OFFSET_ZERO	CAT_RPTR_OFFSET_S // simlex
 
-private:
-    unsigned char * converted;		// holds the converted freq
-    unsigned long freq;			// frequency data as a long
-    unsigned char tempWord[4];		// temp value during conv.
-    char mode[4]; // F6CZV
+#define SQL_DCS			        CAT_SQL_DCS
+#define SQL_DCS_DECD	    	CAT_SQL_DCS_DECD
+#define SQL_DCS_ENCD		    CAT_SQL_DCS_ENCD
+#define SQL_CTCSS			    CAT_SQL_CTCSS
+#define SQL_CTCSS_DECD		    CAT_SQL_CTCSS_DECD
+#define SQL_CTCSS_ENCD		    CAT_SQL_CTCSS_ENCD
+#define SQL_OFF			        CAT_SQL_OFF
 
-    void sendCmd(byte cmd[], byte len);
-    byte singleCmd(int cmd);		// simplifies small cmds
-    byte getByte();
+#define S_METER_S9_10DB         10
+#define S_METER_S9_20DB         11
+#define S_METER_S9_30DB         12
+#define S_METER_S9_40DB         13
+#define S_METER_S9_50DB         14
+#define S_METER_S9_60DB         15
 
-    void sendByte(byte cmd);
-    unsigned long from_bcd_be(const byte bcd_data[], unsigned bcd_len);
-    unsigned char * to_bcd_be( byte bcd_data[], unsigned long freq, unsigned bcd_len);
-    void comError(char * string);
-};
+// end of new constants
 
 #endif
