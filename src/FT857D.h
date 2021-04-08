@@ -396,48 +396,48 @@ All CAT commands to the radio should be sent as 5-byte blocks. The commands are 
 
 class FT857D
 {
-  public:
-	FT857D();
-	void setSerial(SoftwareSerial portInfo);
-	void begin(int baud);
+public:
+    FT857D();
+    void setSerial(SoftwareSerial portInfo);
+    void begin(unsigned long baud = 38400);
 
-	void lock(boolean toggle);
-	void PTT(boolean toggle);
-	void setFreq(long freq);
-	void setMode(char * mode);
-	void clar(boolean toggle);
-	void clarFreq(long freq);
-	void switchVFO();
-	void split(boolean toggle);
-	void rptrOffset(char * ofst);
-	void rptrOffsetFreq(long freq);
-	void squelch(char * mode);
-	void squelchFreq(unsigned int, char * sqlType);
-	char * getMode(); // modified by F6CZV
-	char getVFO(); // new function F6CZV
-	unsigned long getFreqMode();
-	bool chkTx(); // was boolean F6CZV
-        String getSMeter(); // new function F6CZV
-	void getCW_MTR_Conf(byte &MTR,bool &KYR,bool &BK); // new function F6CZV
-	void getAGC_DSP_Conf(bool &AGC,bool &DBF,bool &DNR, bool &DNF); // new function F6CZV
-	bool getSPLIT_status(); // new function F6CZV
-	void flushRX();
-	
+    void lock(boolean toggle);
+    void PTT(boolean toggle);
+    void setFreq(long freq);
+    void setMode(char * mode);
+    void clar(boolean toggle);
+//	void clarFreq(long freq);
+    void switchVFO();
+    void split(boolean toggle);
+    void rptrOffset(char * ofst);
+    void rptrOffsetFreq(long freq);
+    void squelch(char * mode);
+    void squelchFreq(unsigned int, char * sqlType);
+    char * getMode(); // modified by F6CZV
+    char getVFO(); // new function F6CZV
+    unsigned long getFreqMode();
+    bool chkTx(); // was boolean F6CZV
+    String getSMeter(); // new function F6CZV
+    void getCW_MTR_Conf(byte &MTR,bool &KYR,bool &BK); // new function F6CZV
+    void getAGC_DSP_Conf(bool &AGC,bool &DBF,bool &DNR, bool &DNF); // new function F6CZV
+    bool getSPLIT_status(); // new function F6CZV
+    void flushRX();
 
-  private:
-	unsigned char * converted;		// holds the converted freq
-	unsigned long freq;			// frequency data as a long
-	unsigned char tempWord[4];		// temp value during conv.
-	unsigned char * mode; // F6CZV
 
-	void sendCmd(byte cmd[], byte len);
-	byte singleCmd(int cmd);		// simplifies small cmds
-	byte getByte();
+private:
+    unsigned char * converted;		// holds the converted freq
+    unsigned long freq;			// frequency data as a long
+    unsigned char tempWord[4];		// temp value during conv.
+    char mode[4]; // F6CZV
 
-	void sendByte(byte cmd);
-	unsigned long from_bcd_be(const byte bcd_data[], unsigned bcd_len);
-	unsigned char * to_bcd_be( byte bcd_data[], unsigned long freq, unsigned bcd_len);
-	void comError(char * string);
+    void sendCmd(byte cmd[], byte len);
+    byte singleCmd(int cmd);		// simplifies small cmds
+    byte getByte();
+
+    void sendByte(byte cmd);
+    unsigned long from_bcd_be(const byte bcd_data[], unsigned bcd_len);
+    unsigned char * to_bcd_be( byte bcd_data[], unsigned long freq, unsigned bcd_len);
+    void comError(char * string);
 };
 
 #endif
