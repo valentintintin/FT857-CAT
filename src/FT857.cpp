@@ -267,10 +267,14 @@ void FT857::comError(char* string) {
     Serial.println(string);
 }
 
+bool FT857::hasDataToRead() {
+    return rigCat->available();
+}
+
 // gets a byte of input data from the radio
 byte FT857::getByte() {
     unsigned long startTime = millis();
-    while (rigCat->available() < 1 && millis() < startTime + 2000);
+    while (hasDataToRead() < 1 && millis() < startTime + 2000);
     return rigCat->read();
 }
 

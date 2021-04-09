@@ -53,6 +53,9 @@ public:
     void begin(byte rx = 10, byte tx = 11, unsigned long baud = 38400);
 #endif
     void flushRX();
+    bool hasDataToRead();
+    byte getByte();
+    void sendByte(byte cmd);
 
     // Setters
     void setFrequency(unsigned long freq);
@@ -88,9 +91,7 @@ private:
 
     void sendCmd(byte cmd[], byte len);
     byte singleCmd(int cmd, bool getByteReturn = true);		// simplifies small cmds
-    byte getByte();
 
-    void sendByte(byte cmd);
     unsigned long fromBcdBe(const byte bcd_data[], unsigned bcd_len);
     byte* toBcdBe( byte bcd_data[], unsigned long freq, unsigned bcd_len);
     void comError(char* string);
