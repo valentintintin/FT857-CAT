@@ -1,10 +1,3 @@
-/*
- * Yaesu FT-857 : Set CAT baud to 38400
- *
- * Arduino : RX pin 10 / TX pin 11
- * ESP32 : Serial 2, RX pin 16 / TX pin 17
- */
-
 #include "FT857.h"
 FT857 radio;
 
@@ -79,27 +72,27 @@ void loop() {
                 break;
 
             case 11:
-                sMeter = "9+20";
+                sMeter += "9+20";
                 break;
 
             case 12:
-                sMeter = "9+30";
+                sMeter += "9+30";
                 break;
 
             case 13:
-                sMeter = "9+40";
+                sMeter += "9+40";
                 break;
 
             case 14:
-                sMeter = "9+50";
+                sMeter += "9+50";
                 break;
 
             case 15:
-                sMeter = "9+60";
+                sMeter += "9+60";
                 break;
 
             default:
-                sMeter = "UNK";
+                sMeter += "-UNK";
                 break;
         }
     }
@@ -108,5 +101,5 @@ void loop() {
 
     Serial.print(F("PTT: ")); Serial.println(radio.isTx());
 
-    delay(1000);
+    delay(300);
 }

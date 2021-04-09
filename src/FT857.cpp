@@ -154,7 +154,7 @@ void FT857::setCtcssDcsSquelchFrequency(unsigned int freq, bool isCtcss) {
 
 // get the current mode
 byte FT857::getMode() {
-    singleCmd(CAT_RX_FREQ_CMD);
+    singleCmd(CAT_RX_FREQ_CMD, false);
 
     for (int j = 0; j < 4; j++) {
         getByte();
@@ -167,7 +167,7 @@ byte FT857::getMode() {
 
 // get the frequency
 unsigned long FT857::getFrequency() {
-    singleCmd(CAT_RX_FREQ_CMD);
+    singleCmd(CAT_RX_FREQ_CMD, false);
 
     byte chars[4];
 
@@ -184,16 +184,12 @@ unsigned long FT857::getFrequency() {
 // unless the radio is actively TX, the result is always
 // 0x255 so any value other than 0x255 means TX !
 bool FT857::isTx() {                         // was boolean F6CZV
-    singleCmd(CAT_TX_DATA_CMD);
-
-    return getByte() == 255 ? false : true;
+    return singleCmd(CAT_TX_DATA_CMD) == 255 ? false : true;
 }
 
 // get the S Meter value from the radio F6CZV
 byte FT857::getSMeter() {
-    singleCmd(CAT_RX_DATA_CMD);
-
-    return getByte() & 0x0f;
+    return singleCmd(CAT_RX_DATA_CMD) & 0x0f;
 }
 
 // get the VFO status from the radio F6CZV
@@ -291,11 +287,11 @@ void FT857::sendCmd(byte cmd[], byte len) {
 
 // this function reduces total code-space by allowing for
 // single byte commands to be issued (ie. all the toggles)
-byte FT857::singleCmd(int cmd) {
+byte FT857::singleCmd(int cmd, bool getByteReturn) {
     byte outByte[5] = {0, 0, 0, 0, 0};
     outByte[4] = cmd;
     sendCmd(outByte, 5);
-    return getByte();
+    return getByteReturn ? getByte() : 0;
 }
 
 // send a single byte of data (will be removed later)

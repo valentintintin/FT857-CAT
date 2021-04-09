@@ -87,7 +87,7 @@ private:
 #endif
 
     void sendCmd(byte cmd[], byte len);
-    byte singleCmd(int cmd);		// simplifies small cmds
+    byte singleCmd(int cmd, bool getByteReturn = true);		// simplifies small cmds
     byte getByte();
 
     void sendByte(byte cmd);
